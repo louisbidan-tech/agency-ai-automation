@@ -1,0 +1,101 @@
+id,name,email,source,interest,last_action_date,status
+1,Lead 1,lead1@example.com,Referral,One-off audit,2026-03-21,lost
+2,Lead 2,lead2@example.com,SEO,Paid social only,2026-03-06,proposal_sent
+3,Lead 3,lead3@example.com,Meta Ads,One-off audit,2026-03-03,proposal_sent
+4,Lead 4,lead4@example.com,Meta Ads,Full-funnel services,2026-03-28,contacted
+5,Lead 5,lead5@example.com,Email Campaign,SEO retainer,2026-03-17,new
+6,Lead 6,lead6@example.com,Referral,Full-funnel services,2026-03-15,won
+7,Lead 7,lead7@example.com,SEO,Paid social only,2026-03-14,new
+8,Lead 8,lead8@example.com,Meta Ads,One-off audit,2026-03-21,proposal_sent
+9,Lead 9,lead9@example.com,Google Ads,Paid social only,2026-03-07,proposal_sent
+10,Lead 10,lead10@example.com,Email Campaign,Paid social only,2026-03-21,won
+11,Lead 11,lead11@example.com,Google Ads,SEO retainer,2026-03-20,new
+12,Lead 12,lead12@example.com,Meta Ads,Paid social only,2026-03-20,won
+13,Lead 13,lead13@example.com,Meta Ads,Google Ads management,2026-03-28,lost
+14,Lead 14,lead14@example.com,Email Campaign,Full-funnel services,2026-03-24,proposal_sent
+15,Lead 15,lead15@example.com,Email Campaign,Google Ads management,2026-03-08,lost
+16,Lead 16,lead16@example.com,Google Ads,Full-funnel services,2026-03-14,proposal_sent
+17,Lead 17,lead17@example.com,Email Campaign,Google Ads management,2026-03-01,won
+18,Lead 18,lead18@example.com,Meta Ads,SEO retainer,2026-03-22,proposal_sent
+19,Lead 19,lead19@example.com,Meta Ads,Google Ads management,2026-03-12,new
+20,Lead 20,lead20@example.com,Referral,Paid social only,2026-03-01,contacted
+21,Lead 21,lead21@example.com,Google Ads,Paid social only,2026-03-01,contacted
+22,Lead 22,lead22@example.com,Meta Ads,Google Ads management,2026-03-09,lost
+23,Lead 23,lead23@example.com,Meta Ads,One-off audit,2026-03-20,contacted
+24,Lead 24,lead24@example.com,Google Ads,Full-funnel services,2026-03-14,contacted
+25,Lead 25,lead25@example.com,Google Ads,Full-funnel services,2026-03-10,won
+26,Lead 26,lead26@example.com,Meta Ads,SEO retainer,2026-03-29,proposal_sent
+27,Lead 27,lead27@example.com,SEO,Google Ads management,2026-03-06,new
+28,Lead 28,lead28@example.com,Meta Ads,Full-funnel services,2026-03-12,contacted
+29,Lead 29,lead29@example.com,Referral,Paid social only,2026-03-30,proposal_sent
+30,Lead 30,lead30@example.com,SEO,Paid social only,2026-03-16,won
+31,Lead 31,lead31@example.com,Google Ads,Full-funnel services,2026-03-03,new
+32,Lead 32,lead32@example.com,Referral,Full-funnel services,2026-03-14,proposal_sent
+33,Lead 33,lead33@example.com,Google Ads,Paid social only,2026-03-23,won
+34,Lead 34,lead34@example.com,Email Campaign,Google Ads management,2026-03-13,proposal_sent
+35,Lead 35,lead35@example.com,Google Ads,SEO retainer,2026-03-23,won
+36,Lead 36,lead36@example.com,Email Campaign,One-off audit,2026-03-23,lost
+37,Lead 37,lead37@example.com,SEO,Paid social only,2026-03-18,contacted
+38,Lead 38,lead38@example.com,SEO,One-off audit,2026-03-24,new
+39,Lead 39,lead39@example.com,SEO,SEO retainer,2026-03-28,contacted
+40,Lead 40,lead40@example.com,SEO,SEO retainer,2026-03-29,lost
+41,Lead 41,lead41@example.com,Meta Ads,Paid social only,2026-03-17,lost
+42,Lead 42,lead42@example.com,Google Ads,One-off audit,2026-03-24,won
+43,Lead 43,lead43@example.com,Email Campaign,Paid social only,2026-03-28,won
+44,Lead 44,lead44@example.com,Referral,Paid social only,2026-03-24,contacted
+45,Lead 45,lead45@example.com,Meta Ads,SEO retainer,2026-03-09,won
+46,Lead 46,lead46@example.com,Google Ads,One-off audit,2026-03-02,won
+47,Lead 47,lead47@example.com,Google Ads,Full-funnel services,2026-03-04,contacted
+48,Lead 48,lead48@example.com,SEO,SEO retainer,2026-03-26,lost
+49,Lead 49,lead49@example.com,Referral,SEO retainer,2026-03-13,contacted
+50,Lead 50,lead50@example.com,Email Campaign,Google Ads management,2026-03-03,contacted
+51,Lead 51,lead51@example.com,Referral,Full-funnel services,2026-03-12,contacted
+52,Lead 52,lead52@example.com,Email Campaign,One-off audit,2026-03-06,lost
+53,Lead 53,lead53@example.com,Meta Ads,Paid social only,2026-03-29,new
+54,Lead 54,lead54@example.com,Referral,Full-funnel services,2026-03-07,new
+55,Lead 55,lead55@example.com,SEO,Google Ads management,2026-03-25,won
+56,Lead 56,lead56@example.com,Google Ads,SEO retainer,2026-03-05,lost
+57,Lead 57,lead57@example.com,Meta Ads,Paid social only,2026-03-24,won
+58,Lead 58,lead58@example.com,Email Campaign,SEO retainer,2026-03-10,proposal_sent
+59,Lead 59,lead59@example.com,Google Ads,One-off audit,2026-03-10,won
+60,Lead 60,lead60@example.com,Meta Ads,Google Ads management,2026-03-05,won
+61,Lead 61,lead61@example.com,SEO,Paid social only,2026-03-01,new
+62,Lead 62,lead62@example.com,Referral,Paid social only,2026-03-25,proposal_sent
+63,Lead 63,lead63@example.com,Email Campaign,One-off audit,2026-03-12,lost
+64,Lead 64,lead64@example.com,Meta Ads,Google Ads management,2026-03-24,won
+65,Lead 65,lead65@example.com,Referral,Paid social only,2026-03-27,lost
+66,Lead 66,lead66@example.com,Referral,Full-funnel services,2026-03-14,contacted
+67,Lead 67,lead67@example.com,Meta Ads,One-off audit,2026-03-20,contacted
+68,Lead 68,lead68@example.com,Email Campaign,Google Ads management,2026-03-23,proposal_sent
+69,Lead 69,lead69@example.com,Email Campaign,One-off audit,2026-03-27,lost
+70,Lead 70,lead70@example.com,Meta Ads,Google Ads management,2026-03-19,won
+71,Lead 71,lead71@example.com,Google Ads,Paid social only,2026-03-21,contacted
+72,Lead 72,lead72@example.com,SEO,SEO retainer,2026-03-30,contacted
+73,Lead 73,lead73@example.com,Meta Ads,Full-funnel services,2026-03-29,new
+74,Lead 74,lead74@example.com,SEO,Full-funnel services,2026-03-23,won
+75,Lead 75,lead75@example.com,Referral,One-off audit,2026-03-20,contacted
+76,Lead 76,lead76@example.com,Google Ads,Paid social only,2026-03-23,contacted
+77,Lead 77,lead77@example.com,Email Campaign,Google Ads management,2026-03-23,lost
+78,Lead 78,lead78@example.com,Email Campaign,Full-funnel services,2026-03-01,contacted
+79,Lead 79,lead79@example.com,SEO,Full-funnel services,2026-03-30,contacted
+80,Lead 80,lead80@example.com,Google Ads,Google Ads management,2026-03-26,new
+81,Lead 81,lead81@example.com,Referral,SEO retainer,2026-03-08,new
+82,Lead 82,lead82@example.com,Referral,Google Ads management,2026-03-01,proposal_sent
+83,Lead 83,lead83@example.com,Email Campaign,One-off audit,2026-03-09,contacted
+84,Lead 84,lead84@example.com,Referral,Full-funnel services,2026-03-18,new
+85,Lead 85,lead85@example.com,Meta Ads,Google Ads management,2026-03-25,lost
+86,Lead 86,lead86@example.com,Meta Ads,One-off audit,2026-03-13,new
+87,Lead 87,lead87@example.com,SEO,Paid social only,2026-03-02,lost
+88,Lead 88,lead88@example.com,Referral,SEO retainer,2026-03-06,contacted
+89,Lead 89,lead89@example.com,Google Ads,One-off audit,2026-03-09,proposal_sent
+90,Lead 90,lead90@example.com,Email Campaign,SEO retainer,2026-03-01,new
+91,Lead 91,lead91@example.com,Email Campaign,Google Ads management,2026-03-12,contacted
+92,Lead 92,lead92@example.com,Email Campaign,SEO retainer,2026-03-28,lost
+93,Lead 93,lead93@example.com,Meta Ads,Google Ads management,2026-03-17,new
+94,Lead 94,lead94@example.com,SEO,Paid social only,2026-03-06,contacted
+95,Lead 95,lead95@example.com,SEO,SEO retainer,2026-03-08,contacted
+96,Lead 96,lead96@example.com,Google Ads,Google Ads management,2026-03-03,lost
+97,Lead 97,lead97@example.com,Google Ads,Full-funnel services,2026-03-06,won
+98,Lead 98,lead98@example.com,Email Campaign,One-off audit,2026-03-26,new
+99,Lead 99,lead99@example.com,Referral,One-off audit,2026-03-02,lost
+100,Lead 100,lead100@example.com,Referral,Paid social only,2026-03-15,proposal_sent
