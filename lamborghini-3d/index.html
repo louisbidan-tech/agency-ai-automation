@@ -3,69 +3,153 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Lamborghini 3D — Ultra Réaliste</title>
+<title>Lamborghini — Showroom 3D Photoréaliste</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0a0c; }
-  #app { width: 100%; height: 100%; }
-  #hud {
-    position: fixed; top: 24px; left: 28px; color: #e8e8ec;
-    font-family: "Segoe UI", system-ui, sans-serif; pointer-events: none;
-    user-select: none; z-index: 10;
+  :root {
+    --accent: #f5c518;
+    --panel: rgba(12, 12, 16, .72);
+    --stroke: rgba(255, 255, 255, .14);
   }
-  #hud h1 {
-    font-size: 26px; font-weight: 800; letter-spacing: 4px;
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
+  body { font-family: "Segoe UI", system-ui, -apple-system, sans-serif; }
+  #app { width: 100%; height: 100%; }
+  canvas { display: block; }
+
+  /* ---------- Écran de chargement ---------- */
+  #loader {
+    position: fixed; inset: 0; z-index: 100; background: #050507;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    transition: opacity .8s ease; gap: 26px;
+  }
+  #loader.done { opacity: 0; pointer-events: none; }
+  #loader .logo {
+    color: #fff; font-size: 30px; font-weight: 800; letter-spacing: 8px;
     text-transform: uppercase;
   }
-  #hud h1 span { color: #f5c518; }
-  #hud p { font-size: 12px; letter-spacing: 2px; opacity: .55; margin-top: 4px; }
-  #controls {
-    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-    display: flex; gap: 10px; z-index: 10;
-    font-family: "Segoe UI", system-ui, sans-serif;
+  #loader .logo span { color: var(--accent); }
+  #barWrap { width: 320px; height: 3px; background: rgba(255,255,255,.12); border-radius: 2px; overflow: hidden; }
+  #bar { width: 0%; height: 100%; background: var(--accent); transition: width .2s; }
+  #loadPct { color: rgba(255,255,255,.45); font-size: 12px; letter-spacing: 3px; }
+
+  /* ---------- HUD ---------- */
+  #hud {
+    position: fixed; top: 26px; left: 30px; color: #e8e8ec;
+    pointer-events: none; user-select: none; z-index: 10;
   }
+  #hud h1 { font-size: 24px; font-weight: 800; letter-spacing: 5px; text-transform: uppercase; }
+  #hud h1 span { color: var(--accent); }
+  #hud p { font-size: 11px; letter-spacing: 3px; opacity: .5; margin-top: 5px; }
+
+  /* ---------- Panneau latéral ---------- */
+  #panel {
+    position: fixed; right: 26px; top: 50%; transform: translateY(-50%);
+    background: var(--panel); border: 1px solid var(--stroke); border-radius: 16px;
+    padding: 18px 16px; z-index: 10; backdrop-filter: blur(14px);
+    display: flex; flex-direction: column; gap: 16px; width: 196px;
+  }
+  .group-label {
+    color: rgba(255,255,255,.45); font-size: 10px; letter-spacing: 2.5px;
+    text-transform: uppercase; margin-bottom: 8px;
+  }
+  .swatches { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; }
   .swatch {
-    width: 34px; height: 34px; border-radius: 50%; cursor: pointer;
-    border: 2px solid rgba(255,255,255,.35); transition: transform .15s, border .15s;
+    width: 100%; aspect-ratio: 1; border-radius: 50%; cursor: pointer;
+    border: 2px solid rgba(255,255,255,.25); transition: transform .15s, border-color .15s;
   }
-  .swatch:hover { transform: scale(1.15); border-color: #fff; }
-  .btn {
-    padding: 8px 16px; border-radius: 18px; cursor: pointer; font-size: 12px;
-    letter-spacing: 1px; color: #ddd; background: rgba(255,255,255,.08);
-    border: 1px solid rgba(255,255,255,.2); backdrop-filter: blur(6px);
-    transition: background .15s;
+  .swatch:hover { transform: scale(1.14); }
+  .swatch.active { border-color: var(--accent); box-shadow: 0 0 8px rgba(245,197,24,.5); }
+  .row { display: flex; gap: 7px; flex-wrap: wrap; }
+  .chip {
+    padding: 6px 11px; border-radius: 14px; cursor: pointer; font-size: 10.5px;
+    letter-spacing: 1px; color: #ccc; background: rgba(255,255,255,.06);
+    border: 1px solid var(--stroke); transition: all .15s; text-transform: uppercase;
   }
-  .btn:hover { background: rgba(255,255,255,.18); }
-  #hint {
-    position: fixed; bottom: 76px; left: 50%; transform: translateX(-50%);
-    color: rgba(255,255,255,.35); font-size: 11px; letter-spacing: 2px;
-    font-family: "Segoe UI", system-ui, sans-serif; z-index: 10; pointer-events: none;
+  .chip:hover { background: rgba(255,255,255,.16); color: #fff; }
+  .chip.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 700; }
+
+  /* ---------- Barre caméra ---------- */
+  #camBar {
+    position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 8px; z-index: 10; background: var(--panel);
+    border: 1px solid var(--stroke); border-radius: 22px; padding: 8px 10px;
+    backdrop-filter: blur(14px);
+  }
+  #colorName {
+    position: fixed; bottom: 84px; left: 50%; transform: translateX(-50%);
+    color: rgba(255,255,255,.55); font-size: 11px; letter-spacing: 4px; z-index: 10;
+    text-transform: uppercase; pointer-events: none; transition: opacity .3s;
+  }
+  #err {
+    position: fixed; inset: 0; z-index: 90; display: none; align-items: center; justify-content: center;
+    color: #f88; background: #050507; font-size: 14px; letter-spacing: 1px; text-align: center; padding: 30px;
+  }
+  @media (max-width: 760px) {
+    #panel { right: 12px; width: 168px; padding: 14px 12px; }
+    #hud { top: 16px; left: 16px; } #hud h1 { font-size: 18px; }
   }
 </style>
 </head>
 <body>
 <div id="app"></div>
-<div id="hud">
-  <h1>Lamborghini <span>Aventador</span></h1>
-  <p>RENDU 3D TEMPS RÉEL — PBR / CLEARCOAT / HDR</p>
+
+<div id="loader">
+  <div class="logo">Lambor<span>ghini</span></div>
+  <div id="barWrap"><div id="bar"></div></div>
+  <div id="loadPct">CHARGEMENT — 0%</div>
 </div>
-<div id="hint">GLISSER POUR ORBITER &nbsp;·&nbsp; MOLETTE POUR ZOOMER</div>
-<div id="controls">
-  <div class="swatch" style="background:#f5a800" data-color="#f5a800" title="Giallo Orion"></div>
-  <div class="swatch" style="background:#19a24a" data-color="#19a24a" title="Verde Mantis"></div>
-  <div class="swatch" style="background:#c8102e" data-color="#c8102e" title="Rosso Mars"></div>
-  <div class="swatch" style="background:#0d3c8f" data-color="#0d3c8f" title="Blu Nethuns"></div>
-  <div class="swatch" style="background:#dadde0" data-color="#dadde0" title="Bianco Isi"></div>
-  <div class="swatch" style="background:#17181c" data-color="#17181c" title="Nero Aldebaran"></div>
-  <button class="btn" id="toggleSpin">⟳ ROTATION</button>
-  <button class="btn" id="toggleLights">💡 PHARES</button>
+<div id="err"></div>
+
+<div id="hud">
+  <h1>Lambor<span>ghini</span></h1>
+  <p>SHOWROOM 3D — RENDU PHYSIQUE TEMPS RÉEL</p>
+</div>
+
+<div id="panel">
+  <div>
+    <div class="group-label">Teinte carrosserie</div>
+    <div class="swatches" id="swatches"></div>
+  </div>
+  <div>
+    <div class="group-label">Finition</div>
+    <div class="row" id="finishRow">
+      <div class="chip active" data-finish="gloss">Brillant</div>
+      <div class="chip" data-finish="satin">Satin</div>
+      <div class="chip" data-finish="chrome">Chrome</div>
+    </div>
+  </div>
+  <div>
+    <div class="group-label">Ambiance</div>
+    <div class="row">
+      <div class="chip active" id="envSunset">Sunset</div>
+      <div class="chip" id="envStudio">Studio</div>
+    </div>
+  </div>
+  <div>
+    <div class="group-label">Options</div>
+    <div class="row">
+      <div class="chip" id="btnLights">Phares</div>
+      <div class="chip active" id="btnSpin">Rotation</div>
+    </div>
+  </div>
+</div>
+
+<div id="colorName"></div>
+
+<div id="camBar">
+  <div class="chip active" data-cam="hero">¾ Avant</div>
+  <div class="chip" data-cam="front">Face</div>
+  <div class="chip" data-cam="side">Profil</div>
+  <div class="chip" data-cam="rear">Arrière</div>
+  <div class="chip" data-cam="top">Plongée</div>
+  <div class="chip" data-cam="detail">Détail</div>
 </div>
 
 <script type="importmap">
 {
   "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
+    "three": "./vendor/three.module.js",
+    "three/addons/": "./vendor/jsm/"
   }
 }
 </script>
@@ -73,418 +157,483 @@
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { Reflector } from 'three/addons/objects/Reflector.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
 /* ============================================================
-   SCÈNE, CAMÉRA, RENDU
+   RENDU
 ============================================================ */
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.15;
+renderer.toneMappingExposure = 1.0;
 document.getElementById('app').appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x0a0a0c);
-scene.fog = new THREE.Fog(0x0a0a0c, 18, 42);
+scene.background = new THREE.Color(0x050507);
+scene.fog = new THREE.Fog(0x050507, 16, 45);
 
-const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 200);
-camera.position.set(6.4, 2.0, 6.8);
+const camera = new THREE.PerspectiveCamera(38, window.innerWidth / window.innerHeight, 0.1, 300);
+camera.position.set(5.8, 1.7, 5.8);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.target.set(0, 0.55, 0);
 controls.enableDamping = true;
-controls.dampingFactor = 0.06;
-controls.minDistance = 3.5;
-controls.maxDistance = 16;
-controls.maxPolarAngle = Math.PI / 2.05;
-
-// Environnement HDR procédural pour les reflets réalistes
-const pmrem = new THREE.PMREMGenerator(renderer);
-scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+controls.dampingFactor = 0.05;
+controls.minDistance = 2.2;
+controls.maxDistance = 15;
+controls.maxPolarAngle = Math.PI / 2.02;
 
 /* ============================================================
-   ÉCLAIRAGE STUDIO
+   POST-PROCESSING — bloom subtil pour les optiques et reflets
 ============================================================ */
-const keyLight = new THREE.DirectionalLight(0xfff4e0, 2.6);
-keyLight.position.set(6, 9, 4);
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(
+  new THREE.Vector2(window.innerWidth, window.innerHeight), 0.18, 0.6, 0.92
+);
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
+
+/* ============================================================
+   ENVIRONNEMENTS — HDR sunset + studio neutre
+============================================================ */
+const pmrem = new THREE.PMREMGenerator(renderer);
+const studioEnv = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+let sunsetEnv = null;
+scene.environment = studioEnv;
+
+new RGBELoader().load('./assets/venice_sunset_1k.hdr', tex => {
+  tex.mapping = THREE.EquirectangularReflectionMapping;
+  sunsetEnv = pmrem.fromEquirectangular(tex).texture;
+  tex.dispose();
+  scene.environment = sunsetEnv;        // ambiance par défaut : sunset
+  scene.environmentIntensity = 1.15;
+}, undefined, () => { /* fallback silencieux : studio déjà actif */ });
+
+/* ============================================================
+   ÉCLAIRAGE STUDIO (complète l'IBL pour les ombres)
+============================================================ */
+const keyLight = new THREE.DirectionalLight(0xfff2dd, 2.2);
+keyLight.position.set(5, 8, 4);
 keyLight.castShadow = true;
 keyLight.shadow.mapSize.set(4096, 4096);
-keyLight.shadow.camera.left = -8;
-keyLight.shadow.camera.right = 8;
-keyLight.shadow.camera.top = 8;
-keyLight.shadow.camera.bottom = -8;
-keyLight.shadow.bias = -0.0004;
-keyLight.shadow.radius = 6;
+keyLight.shadow.camera.left = -7; keyLight.shadow.camera.right = 7;
+keyLight.shadow.camera.top = 7;  keyLight.shadow.camera.bottom = -7;
+keyLight.shadow.bias = -0.00035;
+keyLight.shadow.normalBias = 0.02;
+keyLight.shadow.radius = 7;
 scene.add(keyLight);
 
-const fillLight = new THREE.DirectionalLight(0x99bbff, 0.7);
-fillLight.position.set(-7, 4, -5);
+const fillLight = new THREE.DirectionalLight(0x8fb6ff, 0.5);
+fillLight.position.set(-6, 3.5, -4);
 scene.add(fillLight);
 
-const rimLight = new THREE.SpotLight(0xffffff, 60, 30, Math.PI / 6, 0.5);
-rimLight.position.set(0, 8, -9);
+const rimLight = new THREE.SpotLight(0xffffff, 90, 35, Math.PI / 5.5, 0.45, 1.4);
+rimLight.position.set(-2, 7, -8);
 scene.add(rimLight);
 
-scene.add(new THREE.AmbientLight(0x404050, 0.5));
+// Rampes de spots de plafond, façon showroom
+const showroomSpots = [];
+[[-3.5, 0], [0, 0], [3.5, 0]].forEach(([x, z]) => {
+  const s = new THREE.SpotLight(0xffffff, 45, 18, Math.PI / 7, 0.6, 1.6);
+  s.position.set(x, 6.5, z);
+  s.target.position.set(x * 0.4, 0, z);
+  scene.add(s, s.target);
+  showroomSpots.push(s);
+});
 
 /* ============================================================
-   SOL — DALLE DE SHOWROOM RÉFLÉCHISSANTE
+   SOL — miroir réel + voile sombre + halo de podium
 ============================================================ */
-const floorMat = new THREE.MeshPhysicalMaterial({
-  color: 0x111114,
-  metalness: 0.1,
-  roughness: 0.35,
-  clearcoat: 0.6,
-  clearcoatRoughness: 0.25,
-  envMapIntensity: 0.8
+const mirror = new Reflector(new THREE.CircleGeometry(30, 64), {
+  clipBias: 0.003,
+  textureWidth: Math.min(window.innerWidth, 1920),
+  textureHeight: Math.min(window.innerHeight, 1080),
+  color: 0x777780
 });
-const floor = new THREE.Mesh(new THREE.CircleGeometry(30, 80), floorMat);
-floor.rotation.x = -Math.PI / 2;
-floor.receiveShadow = true;
-scene.add(floor);
+mirror.rotation.x = -Math.PI / 2;
+mirror.position.y = -0.001;
+scene.add(mirror);
 
-// Anneau lumineux du podium
-const podiumRing = new THREE.Mesh(
-  new THREE.RingGeometry(4.6, 4.75, 128),
-  new THREE.MeshBasicMaterial({ color: 0xf5c518, transparent: true, opacity: 0.55, side: THREE.DoubleSide })
+// Voile sombre semi-transparent : transforme le miroir parfait en dalle polie
+const veil = new THREE.Mesh(
+  new THREE.CircleGeometry(30, 64),
+  new THREE.MeshPhysicalMaterial({
+    color: 0x0a0a0d, transparent: true, opacity: 0.82,
+    metalness: 0.2, roughness: 0.5, envMapIntensity: 0.5
+  })
 );
-podiumRing.rotation.x = -Math.PI / 2;
-podiumRing.position.y = 0.005;
-scene.add(podiumRing);
+veil.rotation.x = -Math.PI / 2;
+veil.position.y = 0.002;
+veil.receiveShadow = true;
+scene.add(veil);
+
+// Halo radial sous la voiture (faux éclairage de podium)
+const haloTex = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 512;
+  const g = c.getContext('2d');
+  const grad = g.createRadialGradient(256, 256, 30, 256, 256, 256);
+  grad.addColorStop(0, 'rgba(255,255,255,0.30)');
+  grad.addColorStop(0.45, 'rgba(255,255,255,0.07)');
+  grad.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = grad; g.fillRect(0, 0, 512, 512);
+  return new THREE.CanvasTexture(c);
+})();
+const halo = new THREE.Mesh(
+  new THREE.CircleGeometry(7, 48),
+  new THREE.MeshBasicMaterial({ map: haloTex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false })
+);
+halo.rotation.x = -Math.PI / 2;
+halo.position.y = 0.004;
+scene.add(halo);
+
+// Anneau du podium
+const ring = new THREE.Mesh(
+  new THREE.RingGeometry(4.45, 4.55, 128),
+  new THREE.MeshBasicMaterial({ color: 0xf5c518, transparent: true, opacity: 0.5, side: THREE.DoubleSide })
+);
+ring.rotation.x = -Math.PI / 2;
+ring.position.y = 0.006;
+scene.add(ring);
 
 /* ============================================================
-   MATÉRIAUX
+   CHARGEMENT DU MODÈLE RÉEL (GLB ~200 000 triangles)
 ============================================================ */
-const paintMat = new THREE.MeshPhysicalMaterial({
-  color: 0xf5a800,            // Giallo Orion
-  metalness: 0.65,
-  roughness: 0.22,
-  clearcoat: 1.0,
-  clearcoatRoughness: 0.05,
-  envMapIntensity: 1.4
-});
-const carbonMat = new THREE.MeshPhysicalMaterial({
-  color: 0x141416,
-  metalness: 0.45,
-  roughness: 0.42,
-  clearcoat: 0.8,
-  clearcoatRoughness: 0.15
-});
-const glassMat = new THREE.MeshPhysicalMaterial({
-  color: 0x0b0d10,
-  metalness: 0,
-  roughness: 0.04,
-  transmission: 0.45,
-  transparent: true,
-  opacity: 0.92,
-  ior: 1.5,
-  envMapIntensity: 2.0
-});
-const chromeMat = new THREE.MeshPhysicalMaterial({
-  color: 0xffffff, metalness: 1.0, roughness: 0.08, envMapIntensity: 1.5
-});
-const matteBlackMat = new THREE.MeshStandardMaterial({
-  color: 0x0c0c0e, metalness: 0.3, roughness: 0.8
-});
-const tireMat = new THREE.MeshStandardMaterial({
-  color: 0x101012, metalness: 0.0, roughness: 0.95
-});
-const rimMat = new THREE.MeshPhysicalMaterial({
-  color: 0x2a2a2e, metalness: 0.95, roughness: 0.25, envMapIntensity: 1.3
-});
-const headlightMat = new THREE.MeshPhysicalMaterial({
-  color: 0xffffff, emissive: 0xcfe8ff, emissiveIntensity: 0.0,
-  metalness: 0.2, roughness: 0.1
-});
-const taillightMat = new THREE.MeshPhysicalMaterial({
-  color: 0x550000, emissive: 0xff1100, emissiveIntensity: 0.0,
-  metalness: 0.2, roughness: 0.15
-});
-const exhaustGlowMat = new THREE.MeshStandardMaterial({
-  color: 0x1a1a1c, metalness: 0.9, roughness: 0.4
-});
+const turntable = new THREE.Group();
+scene.add(turntable);
 
-/* ============================================================
-   CARROSSERIE — construite par profils extrudés
-   Repère : X = longueur (avant +X), Y = hauteur, Z = largeur
-============================================================ */
-const car = new THREE.Group();
-scene.add(car);
+const bodyPaintMats = [];      // matériaux de carrosserie (repeignables)
+const lightEmissives = [];     // matériaux d'optiques (toggle phares)
+const headlightBeams = [];     // vrais spots projetés par les phares
 
-function addMesh(geo, mat, parent = car) {
-  const m = new THREE.Mesh(geo, mat);
-  m.castShadow = true;
-  m.receiveShadow = true;
-  parent.add(m);
-  return m;
+const loader = new GLTFLoader();
+const loaderUI = document.getElementById('loader');
+const bar = document.getElementById('bar');
+const pct = document.getElementById('loadPct');
+
+loader.load('./assets/lambo.glb',
+  gltf => {
+    const car = gltf.scene;
+
+    // Mise à l'échelle / pose au sol, centrée
+    const box = new THREE.Box3().setFromObject(car);
+    const size = box.getSize(new THREE.Vector3());
+    const center = box.getCenter(new THREE.Vector3());
+    car.position.x -= center.x;
+    car.position.z -= center.z;
+    car.position.y -= box.min.y;
+    // Longueur cible ~4.8 m, quel que soit l'export d'origine
+    const s = 4.8 / Math.max(size.x, size.z);
+    car.scale.setScalar(s);
+    car.position.multiplyScalar(s);
+
+    // Cale la voiture au sol sur la base des PNEUS : la bbox globale du GLB
+    // contient des vertices parasites bien sous les roues.
+    car.updateMatrixWorld(true);
+    const tireBox = new THREE.Box3();
+    const tmpBox = new THREE.Box3();
+    car.traverse(o => {
+      if (o.isMesh && /tire/i.test(o.name || '')) {
+        tmpBox.setFromObject(o);
+        tireBox.union(tmpBox);
+      }
+    });
+    if (tireBox.min.y !== Infinity) car.position.y -= tireBox.min.y;
+
+    car.traverse(o => {
+      if (!o.isMesh) return;
+      o.castShadow = true;
+      o.receiveShadow = true;
+      const mats = Array.isArray(o.material) ? o.material : [o.material];
+      mats.forEach(m => upgradeMaterial(m));
+    });
+
+    // Applique les substitutions Standard → Physical décidées par upgradeMaterial
+    if (matSwaps.size) {
+      car.traverse(o => {
+        if (!o.isMesh) return;
+        if (Array.isArray(o.material)) {
+          o.material = o.material.map(m => matSwaps.get(m) || m);
+        } else if (matSwaps.has(o.material)) {
+          o.material = matSwaps.get(o.material);
+        }
+      });
+    }
+
+    turntable.add(car);
+    addHeadlightBeams();
+    finishLoading();
+  },
+  ev => {
+    if (ev.total > 0) {
+      const p = Math.min(100, Math.round(ev.loaded / ev.total * 100));
+      bar.style.width = p + '%';
+      pct.textContent = 'CHARGEMENT — ' + p + '%';
+    }
+  },
+  err => {
+    console.error(err);
+    const e = document.getElementById('err');
+    e.style.display = 'flex';
+    e.textContent = "Impossible de charger le modèle 3D (assets/lambo.glb). Vérifiez que la page est servie par un serveur web (et non ouverte en file://).";
+    loaderUI.classList.add('done');
+  }
+);
+
+function finishLoading() {
+  bar.style.width = '100%';
+  pct.textContent = 'CHARGEMENT — 100%';
+  setTimeout(() => loaderUI.classList.add('done'), 350);
 }
 
-// ---- Coque principale : profil latéral en coin (wedge) ----
-// Le profil est dessiné dans le plan XY puis extrudé selon Z.
-const bodyProfile = new THREE.Shape();
-bodyProfile.moveTo(-2.35, 0.30);                                  // bas arrière
-bodyProfile.lineTo(2.18, 0.30);                                   // bas avant
-bodyProfile.quadraticCurveTo(2.42, 0.31, 2.46, 0.46);             // lame avant
-bodyProfile.quadraticCurveTo(2.40, 0.62, 1.90, 0.72);             // capot plongeant
-bodyProfile.lineTo(0.95, 0.86);                                   // base pare-brise
-bodyProfile.lineTo(-1.45, 0.92);                                  // ligne d'épaule arrière
-bodyProfile.quadraticCurveTo(-2.30, 0.90, -2.42, 0.72);           // chute arrière
-bodyProfile.quadraticCurveTo(-2.46, 0.50, -2.35, 0.30);           // bas du diffuseur
+/* ------------------------------------------------------------
+   Amélioration des matériaux exportés : peinture clearcoat,
+   verre physique, carbone, chromes, optiques émissives
+------------------------------------------------------------ */
+function upgradeMaterial(m) {
+  const n = (m.name || '').toLowerCase();
 
-const bodyGeo = new THREE.ExtrudeGeometry(bodyProfile, {
-  depth: 1.9, bevelEnabled: true,
-  bevelThickness: 0.10, bevelSize: 0.09, bevelSegments: 5, curveSegments: 24
-});
-bodyGeo.translate(0, 0, -0.95);
-addMesh(bodyGeo, paintMat);
+  // — Peinture de carrosserie (extérieure + inserts intérieurs)
+  if (n.includes('bodycolor') || n.includes('body_colour') || n.includes('body colour') || n === 'interior_body_colour') {
+    m.metalness = 0.75;
+    m.roughness = 0.32;
+    m.envMapIntensity = 1.5;
+    // clearcoat : on bascule sur MeshPhysicalMaterial en conservant les maps
+    convertToPhysical(m, phys => {
+      phys.clearcoat = 1.0;
+      phys.clearcoatRoughness = 0.06;
+      bodyPaintMats.push(phys);
+    });
+    return;
+  }
 
-// ---- Habitacle / canopée (cockpit bas et fuyant) ----
-const cabinProfile = new THREE.Shape();
-cabinProfile.moveTo(1.00, 0.84);
-cabinProfile.quadraticCurveTo(0.45, 1.22, -0.15, 1.26);            // pare-brise + toit
-cabinProfile.quadraticCurveTo(-0.95, 1.24, -1.55, 0.90);           // lunette plongeante
-cabinProfile.lineTo(-1.30, 0.86);
-cabinProfile.lineTo(1.00, 0.84);
+  // — Vitrages
+  if (n === 'glass' || n === 'dark_glass' || n.includes('headlight_glass')) {
+    m.transparent = true;
+    m.opacity = n === 'dark_glass' ? 0.85 : 0.5;
+    m.metalness = 0.1;
+    m.roughness = 0.05;
+    m.envMapIntensity = 2.2;
+    m.depthWrite = false;
+    return;
+  }
 
-const cabinGeo = new THREE.ExtrudeGeometry(cabinProfile, {
-  depth: 1.30, bevelEnabled: true,
-  bevelThickness: 0.10, bevelSize: 0.14, bevelSegments: 5, curveSegments: 24
-});
-cabinGeo.translate(0, 0, -0.65);
-addMesh(cabinGeo, glassMat);
+  // — Fibre de carbone : vernis épais
+  if (n.includes('carbon')) {
+    convertToPhysical(m, phys => {
+      phys.clearcoat = 1.0;
+      phys.clearcoatRoughness = 0.12;
+      phys.envMapIntensity = 1.3;
+    });
+    return;
+  }
 
-// Montants de toit + arceau en carbone par-dessus la bulle vitrée
-const roofGeo = new THREE.BoxGeometry(1.05, 0.045, 1.18);
-const roof = addMesh(roofGeo, carbonMat);
-roof.position.set(-0.32, 1.295, 0);
-roof.rotation.z = -0.035;
+  // — Chromes / métaux brillants
+  if (n.includes('exhaust') || n === 'metal' || n.includes('logo') || n.includes('badge')) {
+    m.metalness = Math.max(m.metalness ?? 0, 0.9);
+    m.roughness = Math.min(m.roughness ?? 1, 0.25);
+    m.envMapIntensity = 1.6;
+    return;
+  }
 
-// ---- Lame avant / splitter ----
-const splitterGeo = new THREE.BoxGeometry(0.55, 0.07, 2.05);
-const splitter = addMesh(splitterGeo, carbonMat);
-splitter.position.set(2.32, 0.20, 0);
+  // — Jantes
+  if (n === 'rim' || n.includes('rim')) {
+    m.metalness = 0.9;
+    m.roughness = 0.28;
+    m.envMapIntensity = 1.4;
+    return;
+  }
 
-// ---- Diffuseur arrière ----
-const diffuserGeo = new THREE.BoxGeometry(0.5, 0.16, 1.95);
-const diffuser = addMesh(diffuserGeo, carbonMat);
-diffuser.position.set(-2.32, 0.24, 0);
-diffuser.rotation.z = 0.18;
-for (let i = -2; i <= 2; i++) {                                    // ailettes du diffuseur
-  const fin = addMesh(new THREE.BoxGeometry(0.45, 0.18, 0.025), carbonMat);
-  fin.position.set(-2.42, 0.20, i * 0.38);
-  fin.rotation.z = 0.25;
+  // — Pneus : mats
+  if (n.includes('tire')) {
+    m.metalness = 0;
+    m.roughness = 0.95;
+    return;
+  }
+
+  // — Étriers de frein
+  if (n.includes('caliper')) {
+    m.metalness = 0.4;
+    m.roughness = 0.35;
+    return;
+  }
+
+  // — Optiques : pilotées par le bouton Phares
+  if (n.includes('head_lights') || n.includes('day_lights') || n.includes('taillight') ||
+      n.includes('brake_light') || n === 'lights' || n.includes('door_lights') ||
+      n.includes('signal') || n.includes('reverse_ligh') || n.includes('license_plate_light')) {
+    const isRed = n.includes('tail') || n.includes('brake');
+    m.emissive = new THREE.Color(isRed ? 0xff1505 : 0xd6ecff);
+    m.emissiveIntensity = 0;
+    m.toneMapped = false;
+    lightEmissives.push({ mat: m, on: isRed ? 2.2 : 5.0 });
+    return;
+  }
+
+  // — Reste : léger boost des reflets d'environnement
+  if ('envMapIntensity' in m) m.envMapIntensity = Math.max(m.envMapIntensity ?? 1, 1.0);
 }
 
-// ---- Bas de caisse (rocker panels) ----
-[-1, 1].forEach(side => {
-  const rocker = addMesh(new THREE.BoxGeometry(2.6, 0.16, 0.14), carbonMat);
-  rocker.position.set(-0.05, 0.22, side * 1.06);
-});
-
-// ---- Prises d'air latérales (signature Aventador) ----
-[-1, 1].forEach(side => {
-  const intake = addMesh(new THREE.BoxGeometry(0.85, 0.34, 0.16), matteBlackMat);
-  intake.position.set(-1.05, 0.78, side * 1.02);
-  intake.rotation.y = side * 0.18;
-  const scoopLip = addMesh(new THREE.BoxGeometry(0.92, 0.05, 0.22), paintMat);
-  scoopLip.position.set(-1.05, 0.97, side * 1.0);
-  scoopLip.rotation.y = side * 0.18;
-});
-
-// ---- Capot moteur vitré avec persiennes ----
-for (let i = 0; i < 6; i++) {
-  const louver = addMesh(new THREE.BoxGeometry(0.07, 0.02, 1.05), matteBlackMat);
-  louver.position.set(-1.62 - i * 0.13, 0.93 - i * 0.018, 0);
-}
-
-// ---- Aileron arrière ----
-const wingBlade = addMesh(new THREE.BoxGeometry(0.34, 0.035, 1.85), carbonMat);
-wingBlade.position.set(-2.28, 1.18, 0);
-wingBlade.rotation.z = 0.14;
-[-1, 1].forEach(side => {
-  const strut = addMesh(new THREE.BoxGeometry(0.26, 0.30, 0.05), carbonMat);
-  strut.position.set(-2.22, 1.0, side * 0.62);
-  strut.rotation.z = 0.3;
-});
-
-/* ============================================================
-   OPTIQUES
-============================================================ */
-// Phares avant en "Y" (trois barres convergentes par optique)
-const headlights = [];
-[-1, 1].forEach(side => {
-  const housing = addMesh(new THREE.BoxGeometry(0.16, 0.13, 0.55), matteBlackMat);
-  housing.position.set(2.30, 0.58, side * 0.62);
-  housing.rotation.y = side * -0.35;
-
-  const angles = [0.5, 0, -0.5];
-  angles.forEach(a => {
-    const bar = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.035, 0.30), headlightMat);
-    bar.position.set(2.40, 0.58 + a * 0.05, side * 0.62 + a * side * 0.07);
-    bar.rotation.y = side * -0.35;
-    bar.rotation.x = a * 0.7;
-    car.add(bar);
-    headlights.push(bar);
+// Crée un MeshPhysicalMaterial équivalent (les maps sont partagées, pas clonées)
+// et l'enregistre pour substitution sur les meshes concernés.
+const matSwaps = new Map();
+function convertToPhysical(m, customize) {
+  if (m.isMeshPhysicalMaterial) { customize(m); return; }
+  if (matSwaps.has(m)) { customize(matSwaps.get(m)); return; }
+  const phys = new THREE.MeshPhysicalMaterial({
+    name: m.name,
+    color: m.color.clone(),
+    map: m.map,
+    normalMap: m.normalMap,
+    metalness: m.metalness,
+    roughness: m.roughness,
+    metalnessMap: m.metalnessMap,
+    roughnessMap: m.roughnessMap,
+    aoMap: m.aoMap,
+    aoMapIntensity: m.aoMapIntensity,
+    emissive: m.emissive ? m.emissive.clone() : undefined,
+    emissiveMap: m.emissiveMap,
+    emissiveIntensity: m.emissiveIntensity,
+    alphaMap: m.alphaMap,
+    transparent: m.transparent,
+    opacity: m.opacity,
+    side: m.side,
+    envMapIntensity: m.envMapIntensity
   });
-
-  // Faisceau lumineux (spot réel)
-  const beam = new THREE.SpotLight(0xcfe8ff, 0, 25, Math.PI / 7, 0.4, 1.2);
-  beam.position.set(2.4, 0.6, side * 0.62);
-  const beamTarget = new THREE.Object3D();
-  beamTarget.position.set(9, 0.2, side * 1.2);
-  car.add(beamTarget);
-  beam.target = beamTarget;
-  car.add(beam);
-  headlights.push(beam);
-});
-
-// Feux arrière en "Y" inversé + bandeau
-const taillights = [];
-[-1, 1].forEach(side => {
-  const tl = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.10, 0.42), taillightMat);
-  tl.position.set(-2.50, 0.66, side * 0.62);
-  car.add(tl);
-  taillights.push(tl);
-});
-const tlStrip = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.035, 1.30), taillightMat);
-tlStrip.position.set(-2.50, 0.66, 0);
-car.add(tlStrip);
-taillights.push(tlStrip);
-
-// Échappements hexagonaux centraux
-[-0.14, 0.14].forEach(z => {
-  const pipe = addMesh(new THREE.CylinderGeometry(0.065, 0.075, 0.18, 6), exhaustGlowMat);
-  pipe.rotation.z = Math.PI / 2;
-  pipe.position.set(-2.46, 0.42, z);
-  const inner = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.045, 0.045, 0.19, 6),
-    new THREE.MeshStandardMaterial({ color: 0x000000, roughness: 1 })
-  );
-  inner.rotation.z = Math.PI / 2;
-  inner.position.set(-2.465, 0.42, z);
-  car.add(inner);
-});
-
-// Grille avant hexagonale
-for (let r = 0; r < 2; r++) {
-  for (let c = -3; c <= 3; c++) {
-    const hex = addMesh(new THREE.CylinderGeometry(0.045, 0.045, 0.04, 6), matteBlackMat);
-    hex.rotation.z = Math.PI / 2;
-    hex.position.set(2.47, 0.40 + r * 0.09, c * 0.11 + (r % 2) * 0.055);
-  }
+  if (m.normalScale) phys.normalScale.copy(m.normalScale);
+  customize(phys);
+  matSwaps.set(m, phys);
 }
 
-// Rétroviseurs
-[-1, 1].forEach(side => {
-  const arm = addMesh(new THREE.BoxGeometry(0.05, 0.04, 0.22), carbonMat);
-  arm.position.set(0.85, 1.02, side * 1.06);
-  const mirror = addMesh(new THREE.BoxGeometry(0.06, 0.10, 0.18), paintMat);
-  mirror.position.set(0.85, 1.06, side * 1.18);
-});
+// Vrais faisceaux de phares (spots attachés au plateau)
+function addHeadlightBeams() {
+  [-0.72, 0.72].forEach(z => {
+    const beam = new THREE.SpotLight(0xd6ecff, 0, 30, Math.PI / 6.5, 0.45, 1.1);
+    beam.position.set(1.9, 0.62, z);
+    const target = new THREE.Object3D();
+    target.position.set(12, 0.1, z * 1.6);
+    turntable.add(beam, target);
+    beam.target = target;
+    headlightBeams.push(beam);
+  });
+}
 
 /* ============================================================
-   ROUES — pneus toriques, jantes à 10 branches, disques percés
+   INTERFACE — couleurs, finitions, ambiance, caméras
 ============================================================ */
-const wheels = [];
-function buildWheel(radius = 0.42, width = 0.34) {
-  const wheel = new THREE.Group();
-
-  // Pneu
-  const tire = new THREE.Mesh(
-    new THREE.TorusGeometry(radius - 0.085, 0.105, 24, 48), tireMat
-  );
-  tire.scale.z = width / 0.21;
-  tire.castShadow = true;
-  wheel.add(tire);
-
-  // Voile de jante
-  const hub = new THREE.Mesh(
-    new THREE.CylinderGeometry(radius - 0.16, radius - 0.16, width * 0.55, 32), rimMat
-  );
-  hub.rotation.x = Math.PI / 2;
-  wheel.add(hub);
-
-  // 10 branches
-  for (let i = 0; i < 10; i++) {
-    const spoke = new THREE.Mesh(new THREE.BoxGeometry(0.05, radius - 0.12, width * 0.5), rimMat);
-    spoke.position.y = (radius - 0.12) / 2;
-    const pivot = new THREE.Group();
-    pivot.add(spoke);
-    pivot.rotation.z = (i / 10) * Math.PI * 2;
-    wheel.add(pivot);
-  }
-
-  // Cache-moyeu chromé
-  const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, width * 0.6, 24), chromeMat);
-  cap.rotation.x = Math.PI / 2;
-  wheel.add(cap);
-
-  // Disque de frein + étrier jaune (ne tourne pas avec la roue)
-  const brakeAssembly = new THREE.Group();
-  const disc = new THREE.Mesh(
-    new THREE.CylinderGeometry(radius - 0.18, radius - 0.18, 0.03, 32), chromeMat
-  );
-  disc.rotation.x = Math.PI / 2;
-  brakeAssembly.add(disc);
-  const caliper = new THREE.Mesh(
-    new THREE.BoxGeometry(0.10, 0.16, 0.09),
-    new THREE.MeshStandardMaterial({ color: 0xf5c518, metalness: 0.4, roughness: 0.4 })
-  );
-  caliper.position.set(radius - 0.24, 0.05, 0);
-  brakeAssembly.add(caliper);
-
-  return { wheel, brakeAssembly };
-}
-
-const wheelPositions = [
-  { x: 1.52, z: 0.95 }, { x: 1.52, z: -0.95 },
-  { x: -1.45, z: 0.98 }, { x: -1.45, z: -0.98 }   // voie arrière plus large
+const LAMBO_COLORS = [
+  { name: 'Giallo Orion',   hex: '#f5a800' },
+  { name: 'Verde Mantis',   hex: '#1ca64c' },
+  { name: 'Arancio Argos',  hex: '#e35205' },
+  { name: 'Rosso Mars',     hex: '#c8102e' },
+  { name: 'Blu Nethuns',    hex: '#0d3c8f' },
+  { name: 'Viola Parsifae', hex: '#5b2a86' },
+  { name: 'Bianco Isi',     hex: '#dcdfe2' },
+  { name: 'Nero Aldebaran', hex: '#141518' }
 ];
-wheelPositions.forEach((p, i) => {
-  const isRear = i >= 2;
-  const { wheel, brakeAssembly } = buildWheel(isRear ? 0.45 : 0.42, isRear ? 0.40 : 0.32);
-  wheel.position.set(p.x, isRear ? 0.45 : 0.42, p.z);
-  brakeAssembly.position.copy(wheel.position);
-  car.add(wheel, brakeAssembly);
-  wheels.push(wheel);
 
-  // Passage de roue sombre derrière la roue
-  const arch = new THREE.Mesh(
-    new THREE.CylinderGeometry(isRear ? 0.56 : 0.53, isRear ? 0.56 : 0.53, 0.30, 32, 1, false, 0, Math.PI),
-    matteBlackMat
-  );
-  arch.rotation.x = Math.PI / 2;
-  arch.rotation.z = Math.PI;
-  arch.position.set(p.x, isRear ? 0.46 : 0.43, p.z * 0.92);
-  arch.rotation.y = Math.PI / 2;
-  car.add(arch);
+const swatchWrap = document.getElementById('swatches');
+const colorNameEl = document.getElementById('colorName');
+LAMBO_COLORS.forEach((c, i) => {
+  const d = document.createElement('div');
+  d.className = 'swatch' + (i === 0 ? ' active' : '');
+  d.style.background = c.hex;
+  d.title = c.name;
+  d.addEventListener('click', () => {
+    document.querySelectorAll('.swatch').forEach(x => x.classList.remove('active'));
+    d.classList.add('active');
+    bodyPaintMats.forEach(m => m.color.set(c.hex));
+    colorNameEl.textContent = c.name;
+    colorNameEl.style.opacity = 1;
+    clearTimeout(colorNameEl._t);
+    colorNameEl._t = setTimeout(() => colorNameEl.style.opacity = 0, 1800);
+  });
+  swatchWrap.appendChild(d);
 });
 
-/* ============================================================
-   INTERACTIONS
-============================================================ */
-let autoSpin = true;
+// Finitions
+document.getElementById('finishRow').addEventListener('click', e => {
+  const chip = e.target.closest('.chip'); if (!chip) return;
+  document.querySelectorAll('#finishRow .chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  const f = chip.dataset.finish;
+  bodyPaintMats.forEach(m => {
+    if (f === 'gloss')  { m.metalness = 0.75; m.roughness = 0.32; m.clearcoat = 1.0;  m.clearcoatRoughness = 0.06; }
+    if (f === 'satin')  { m.metalness = 0.55; m.roughness = 0.55; m.clearcoat = 0.25; m.clearcoatRoughness = 0.5;  }
+    if (f === 'chrome') { m.metalness = 1.0;  m.roughness = 0.05; m.clearcoat = 1.0;  m.clearcoatRoughness = 0.03; }
+  });
+});
+
+// Ambiance
+const envSunsetBtn = document.getElementById('envSunset');
+const envStudioBtn = document.getElementById('envStudio');
+envSunsetBtn.addEventListener('click', () => {
+  if (sunsetEnv) scene.environment = sunsetEnv;
+  scene.environmentIntensity = 1.15;
+  envSunsetBtn.classList.add('active'); envStudioBtn.classList.remove('active');
+});
+envStudioBtn.addEventListener('click', () => {
+  scene.environment = studioEnv;
+  scene.environmentIntensity = 1.0;
+  envStudioBtn.classList.add('active'); envSunsetBtn.classList.remove('active');
+});
+
+// Phares
 let lightsOn = false;
-
-document.querySelectorAll('.swatch').forEach(s => {
-  s.addEventListener('click', () => paintMat.color.set(s.dataset.color));
-});
-document.getElementById('toggleSpin').addEventListener('click', () => autoSpin = !autoSpin);
-document.getElementById('toggleLights').addEventListener('click', () => {
+document.getElementById('btnLights').addEventListener('click', e => {
   lightsOn = !lightsOn;
-  headlightMat.emissiveIntensity = lightsOn ? 4.0 : 0.0;
-  taillightMat.emissiveIntensity = lightsOn ? 3.0 : 0.0;
-  headlights.forEach(h => { if (h.isSpotLight) h.intensity = lightsOn ? 80 : 0; });
+  e.target.classList.toggle('active', lightsOn);
+  lightEmissives.forEach(({ mat, on }) => mat.emissiveIntensity = lightsOn ? on : 0);
+  headlightBeams.forEach(b => b.intensity = lightsOn ? 110 : 0);
+  bloom.strength = lightsOn ? 0.32 : 0.18;
+});
+
+// Rotation
+let autoSpin = true;
+document.getElementById('btnSpin').addEventListener('click', e => {
+  autoSpin = !autoSpin;
+  e.target.classList.toggle('active', autoSpin);
+});
+
+// Presets caméra avec interpolation douce
+const CAM_PRESETS = {
+  hero:   { pos: [5.2, 1.55, 5.2],  tgt: [0, 0.55, 0] },
+  front:  { pos: [7.2, 0.95, 0.0],  tgt: [0, 0.55, 0] },
+  side:   { pos: [0.2, 1.05, 7.4],  tgt: [0, 0.55, 0] },
+  rear:   { pos: [-6.8, 1.5, -2.6], tgt: [0, 0.6, 0] },
+  top:    { pos: [3.2, 7.5, 3.2],   tgt: [0, 0, 0] },
+  detail: { pos: [2.6, 0.62, 2.0],  tgt: [1.2, 0.5, 0.4] }
+};
+let camAnim = null;
+document.getElementById('camBar').addEventListener('click', e => {
+  const chip = e.target.closest('.chip'); if (!chip) return;
+  document.querySelectorAll('#camBar .chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  const p = CAM_PRESETS[chip.dataset.cam];
+  camAnim = {
+    t: 0,
+    fromPos: camera.position.clone(),
+    toPos: new THREE.Vector3(...p.pos),
+    fromTgt: controls.target.clone(),
+    toTgt: new THREE.Vector3(...p.tgt)
+  };
 });
 
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+  composer.setSize(window.innerWidth, window.innerHeight);
 });
 
 /* ============================================================
@@ -496,16 +645,20 @@ function animate() {
   const dt = clock.getDelta();
   const t = clock.elapsedTime;
 
-  if (autoSpin) car.rotation.y += dt * 0.25;
+  if (autoSpin) turntable.rotation.y += dt * 0.16;
 
-  // Léger flottement de la caisse (suspension au ralenti)
-  car.position.y = Math.sin(t * 1.4) * 0.006;
+  ring.material.opacity = 0.38 + Math.sin(t * 1.8) * 0.14;
 
-  // Pulsation discrète de l'anneau du podium
-  podiumRing.material.opacity = 0.4 + Math.sin(t * 2) * 0.15;
+  if (camAnim) {
+    camAnim.t = Math.min(1, camAnim.t + dt * 0.9);
+    const k = 1 - Math.pow(1 - camAnim.t, 3);            // ease-out cubic
+    camera.position.lerpVectors(camAnim.fromPos, camAnim.toPos, k);
+    controls.target.lerpVectors(camAnim.fromTgt, camAnim.toTgt, k);
+    if (camAnim.t >= 1) camAnim = null;
+  }
 
   controls.update();
-  renderer.render(scene, camera);
+  composer.render();
 }
 animate();
 </script>
